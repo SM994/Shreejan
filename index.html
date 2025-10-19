@@ -38,14 +38,14 @@
 </head>
 
 <body>
-
+<div id="ip-display" style="background-color:#f8f9fa; text-align:center; padding:10px; font-weight:bold;">
+  Your IP Address is: <span id="user-ip">Loading...</span>
+</div>
   <!-- ======= Header ======= -->
   <header id="header">
 
     <div class="container">
-<div id="ip-display" style="background-color:#f8f9fa; text-align:center; padding:10px; font-weight:bold;">
-  Your IP Address is: <span id="user-ip">Loading...</span>
-</div>
+
       <h1><a href="index.html">Shreejan Maharjan</a></h1>
       <!-- Uncomment below if you prefer to use an image logo -->
       <!-- <a href="index.html" class="mr-auto"><img src="assets/img/logo.png" alt="" class="img-fluid"></a> -->
@@ -766,7 +766,18 @@
     <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/personal-free-resume-bootstrap-template/ -->
     Designed by <a href="https://bootstrapmade.com/">Shreejan</a>
   </div>
-
+<script>
+  // Fetch user's IP using a free API
+  fetch('https://api.ipify.org?format=json')
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('user-ip').textContent = data.ip;
+    })
+    .catch(err => {
+      document.getElementById('user-ip').textContent = 'Unable to fetch IP';
+      console.error(err);
+    });
+</script>
   <!-- Vendor JS Files -->
   <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -782,6 +793,7 @@
 </body>
 
 </html>
+
 
 
 
