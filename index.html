@@ -55,6 +55,111 @@
     });
 </script>
 
+<!-- ======= IP + City + Municipality Display ======= -->
+<div id="ip-info" class="text-center py-2" style="font-weight:600;">
+  Your IP: <span id="user-ip">Loading...</span> —
+  Location: <span id="user-city">Detecting city...</span>, <span id="user-country">Detecting country...</span>
+  <div style="font-weight:500; margin-top:6px;">
+    Municipality/Nagarpalika: <span id="user-muni">Detecting...</span>
+  </div>
+</div>
+
+<script>
+(async function() {
+  const ipEl = document.getElementById('user-ip');
+  const cityEl = document.getElementById('user-city');
+  const countryEl = document.getElementById('user-country');
+  const muniEl = document.getElementById('user-muni');
+
+  // 1) Fetch IP + IP-based city/country (fast fallback)
+  try {
+    const r = await fetch('https://ipapi.co/json/');
+    const j = await r.json();
+    if (j && j.ip) {
+      ipEl.textContent = j.ip;
+      cityEl.textContent = j.city || (j.region || 'Unknown');
+      countryEl.textContent = j.country_name || j.country || 'Unknown';
+      // provisional municipality from IP data (if available)
+      if (j.city) muniEl.textContent = j.city;
+    } else {
+      ipEl.textContent = 'Unavailable';
+      cityEl.textContent = 'Unavailable';
+      countryEl.textContent = 'Unavailable';
+    }
+  } catch (err) {
+    console.warn('IP lookup failed:', err);
+    ipEl.textContent = 'Unable to fetch IP';
+    cityEl.textContent = 'Unavailable';
+    countryEl.textContent = 'Unavailable';
+  }
+
+  // 2) Try browser GPS and reverse-geocode to get more precise municipality info
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+
+      // Reverse geocode with Nominatim (OpenStreetMap)
+      // Note: Nominatim has usage policy; this is ok for normal small use by a website.
+      // format=jsonv2 returns address fields.
+      try {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&zoom=16&addressdetails=1`;
+        const resp = await fetch(url, {
+          headers: {
+            // polite user agent recommended; browsers set one automatically
+            'Accept-Language': 'en'
+          }
+        });
+        const data = await resp.json();
+        if (data && data.address) {
+          const a = data.address;
+          // check several possible fields for municipality-like name
+          const muni = a.municipality || a.city || a.town || a.village || a.county || a.state_district || null;
+          if (muni) {
+            muniEl.textContent = muni;
+          } else {
+            // if no municipality field, fall back to city/state/county
+            muniEl.textContent = a.city || a.town || a.village || a.county || 'Unavailable';
+          }
+
+          // Also update city/country from GPS reverse geocode if available (more accurate than IP)
+          if (a.city || a.town || a.village) cityEl.textContent = a.city || a.town || a.village;
+          if (a.country) countryEl.textContent = a.country;
+        } else {
+          console.warn('Reverse-geocode returned no address');
+          // keep IP-based values as fallback
+          if (!muniEl.textContent || muniEl.textContent === 'Detecting...') muniEl.textContent = 'Unavailable';
+        }
+      } catch (err) {
+        console.warn('Reverse geocode failed:', err);
+        if (!muniEl.textContent || muniEl.textContent === 'Detecting...') muniEl.textContent = 'Unavailable';
+      }
+    }, (err) => {
+      // user denied or other error — keep IP-based city as municipality fallback
+      console.warn('Geolocation error:', err);
+      if (!muniEl.textContent || muniEl.textContent === 'Detecting...') {
+        // if IP gave a city, we already put it; else show message
+        if (!cityEl.textContent || cityEl.textContent === 'Detecting city...') {
+          muniEl.textContent = 'Not available (GPS denied)';
+        } else {
+          muniEl.textContent = cityEl.textContent; // fallback
+        }
+      }
+    }, {
+      enableHighAccuracy: false,
+      timeout: 8000,
+      maximumAge: 60_000
+    });
+  } else {
+    // geolocation not supported
+    if (!muniEl.textContent || muniEl.textContent === 'Detecting...') {
+      muniEl.textContent = cityEl.textContent || 'Not supported';
+    }
+  }
+})();
+</script>
+
+  
 
   
   <!-- ======= Header ======= -->
@@ -809,6 +914,7 @@
 </body>
 
 </html>
+
 
 
 
