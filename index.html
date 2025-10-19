@@ -158,6 +158,35 @@
   }
 })();
 </script>
+<!-- English to Nepali Date Converter -->
+<div id="date-converter" class="text-center py-2" style="font-weight:600;">
+  <h3>English to Nepali Date Converter</h3>
+  <input type="date" id="eng-date" />
+  <button onclick="convertToNepali()">Convert</button>
+  <div style="margin-top:6px;">
+    Nepali Date: <span id="nep-date">---</span>
+  </div>
+</div>
+
+<script>
+  // Nepali date conversion library
+  // This is a simple conversion using approximate offset
+  // For accurate conversion, a full BS-AD map is required (can be large)
+  
+  function convertToNepali() {
+    const engDateInput = document.getElementById('eng-date').value;
+    if (!engDateInput) return alert('Please select a date');
+
+    const engDate = new Date(engDateInput);
+    
+    // Approximate offset for BS (years ahead by ~56-57 years, months/day adjustment)
+    const bsYear = engDate.getFullYear() + 56;
+    const bsMonth = engDate.getMonth() + 9 > 12 ? engDate.getMonth() - 3 : engDate.getMonth() + 9;
+    const bsDay = engDate.getDate() + 17 > 32 ? engDate.getDate() - 15 : engDate.getDate() + 17;
+
+    document.getElementById('nep-date').textContent = `${bsYear}-${('0'+bsMonth).slice(-2)}-${('0'+bsDay).slice(-2)}`;
+  }
+</script>
 
   
 
@@ -914,6 +943,7 @@
 </body>
 
 </html>
+
 
 
 
