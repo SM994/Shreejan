@@ -40,9 +40,7 @@
 
   <!-- ======= Header ======= -->
   <header id="header">
-    <div id="ip-display" style="background-color:#f8f9fa; text-align:center; padding:10px; font-weight:bold;">
-  Your IP Address is: <span id="user-ip">Loading...</span>
-</div>
+
     <div class="container">
 
       <h1><a href="index.html">Shreejan Maharjan</a></h1>
@@ -777,19 +775,9 @@
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
-<script>
-// Fetch user's IP using a free API
-fetch('https://api.ipify.org?format=json')
-  .then(response => response.json())
-  .then(data => {
-    document.getElementById('user-ip').textContent = data.ip;
-  })
-  .catch(err => {
-    document.getElementById('user-ip').textContent = 'Unable to fetch IP';
-    console.error(err);
-  });
-</script>
+
 </body>
 
 </html>
+
 
