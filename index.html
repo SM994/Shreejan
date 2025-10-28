@@ -157,65 +157,8 @@
     }
   }
 })();
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AD → BS Date Converter (Accurate)</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 24px; max-width:600px; margin:auto; }
-    label, button { display:block; margin-top:12px; }
-    #nep-date { margin-top:12px; font-weight:bold; }
-  </style>
-</head>
-<body>
-  <h2>Convert English Date (AD) to Nepali Date (BS)</h2>
 
-  <label>
-    Select AD date:
-    <input id="eng-date" type="date" />
-  </label>
-
-  <button id="convert">Convert to BS</button>
-
-  <div id="nep-date">Converted BS date will appear here</div>
-
-  <script type="module">
-    // Use the library via CDN
-    import DateConverter from 'https://cdn.jsdelivr.net/npm/nepali-date-converter@3.4.0/dist/nepali-date-converter.es5.js';
-
-    const btn = document.getElementById('convert');
-    const out = document.getElementById('nep-date');
-
-    btn.addEventListener('click', () => {
-      const val = document.getElementById('eng-date').value;
-      if (!val) {
-        out.textContent = 'Please select a date.';
-        return;
-      }
-
-      // Format is "YYYY-MM-DD"
-      try {
-        const converter = new DateConverter(val);
-        const bsObj = converter.toBs();  // Convert AD to BS
-        const bsYear = bsObj.year;
-        const bsMonth = bsObj.month;
-        const bsDay = bsObj.date;
-        // Optional: day of week is bsObj.day
-        out.textContent = `${bsYear}-${String(bsMonth).padStart(2,'0')}-${String(bsDay).padStart(2,'0')} (BS)`;
-      } catch (err) {
-        out.textContent = 'Conversion error: ' + err.message;
-      }
-    });
-  </script>
-
-</body>
-</html>
-
-
-
-  
+</script>
 </body>
 </html>
 
@@ -976,6 +919,7 @@
 </body>
 
 </html>
+
 
 
 
