@@ -38,6 +38,32 @@
 </head>
 
 <body>
+<section id="weather" style="text-align:center;margin:20px 0;">
+  <h3>Current Weather</h3>
+  <div id="weatherInfo">Fetching weather...</div>
+</section>
+
+<script>
+  function weatherText(code){
+    const t={0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',
+             45:'Fog',51:'Light drizzle',61:'Light rain',63:'Moderate rain',
+             65:'Heavy rain',80:'Rain showers',95:'Thunderstorm'};
+    return t[code]||'Unknown';
+  }
+
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(async pos=>{
+      const {latitude,longitude}=pos.coords;
+      const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+      const d=await r.json();
+      const w=d.current_weather;
+      document.getElementById('weatherInfo').innerHTML=
+        `🌡️ ${w.temperature}°C&nbsp;&nbsp;💨 ${w.windspeed} km/h&nbsp;&nbsp;☁️ ${weatherText(w.weathercode)}`;
+    },()=>document.getElementById('weatherInfo').innerText='Location permission denied.');
+  } else {
+    document.getElementById('weatherInfo').innerText='Geolocation not supported.';
+  }
+</script>
 
 </body>
 </html>  
@@ -793,6 +819,7 @@
 </body>
 
 </html>
+
 
 
 
