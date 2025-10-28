@@ -168,33 +168,66 @@
   </div>
 </div>
 
-<script>
-  function convertToNepali() {
-    const engDateInput = document.getElementById('eng-date').value;
-    if (!engDateInput) return alert('Please select a date');
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Accurate AD → BS Converter</title>
+  <style>
+    body { font-family: system-ui, Arial; padding: 24px; max-width:600px; margin:auto; }
+    label, button { display:block; margin-top:12px; }
+    #nep-date { margin-top:12px; font-weight:700; }
+  </style>
+</head>
+<body>
+  <h2>English (AD) → Nepali (BS) date</h2>
 
-    const engDate = new Date(engDateInput);
+  <label>
+    Select AD date:
+    <input id="eng-date" type="date" />
+  </label>
 
-    // Basic offset: BS calendar is about 56 years and 8 months ahead of AD
-    let bsYear = engDate.getFullYear() + 57;
-    let bsMonth = engDate.getMonth() + 9; // JS months are 0-based (0=Jan)
-    let bsDay = engDate.getDate() + 17;
+  <button id="convert">Convert to Nepali (BS)</button>
 
-    // Adjust overflow for day and month
-    if (bsDay > 30) {
-      bsDay -= 30;
-      bsMonth += 1;
+  <div id="nep-date">BS date will appear here</div>
+
+  <script type="module">
+    // Import the converter from jsDelivr CDN (ES module build)
+    import { convertADToBS } from 'https://cdn.jsdelivr.net/npm/nepali-date-converter@3.3.1/dist/nepali-date-converter.es5.js';
+
+    const btn = document.getElementById('convert');
+    const out = document.getElementById('nep-date');
+
+    btn.addEventListener('click', () => {
+      const val = document.getElementById('eng-date').value;
+      if (!val) {
+        out.textContent = 'Please select a date';
+        return;
+      }
+
+      // val is YYYY-MM-DD
+      const [y, m, d] = val.split('-').map(Number);
+
+      // convertADToBS expects { year, month, day } with month = 1..12
+      try {
+        const bs = convertADToBS({ year: y, month: m, day: d });
+        // bs returns { year, month, day } (numbers)
+        const formatted = `${bs.year}-${String(bs.month).padStart(2,'0')}-${String(bs.day).padStart(2,'0')}`;
+        out.textContent = formatted + `  (BS) — Nepali: ${getNepaliMonthName(bs.month)} ${bs.day}, ${bs.year}`;
+      } catch (err) {
+        out.textContent = 'Conversion error: ' + err.message;
+      }
+    });
+
+    function getNepaliMonthName(m) {
+      const months = ['Baisakh','Jestha','Ashadh','Shrawan','Bhadra','Ashwin','Kartik','Mangsir','Poush','Magh','Falgun','Chaitra'];
+      return months[m-1] || '';
     }
+  </script>
+</body>
+</html>
 
-    if (bsMonth > 12) {
-      bsMonth -= 12;
-      bsYear += 1;
-    }
-
-    document.getElementById('nep-date').textContent =
-      `${bsYear}-${('0' + bsMonth).slice(-2)}-${('0' + bsDay).slice(-2)}`;
-  }
-</script>
 
 
   
@@ -952,6 +985,7 @@
 </body>
 
 </html>
+
 
 
 
