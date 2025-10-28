@@ -36,27 +36,38 @@
   ======================================================== -->
 
 </head>
-<body>
-<section id="ip-info" style="text-align:center;margin:20px 0;">
-  <h3>Your IP & Location</h3>
-  <div id="ipDetails">Fetching info...</div>
-</section>
 
-<script>
-fetch('https://ipapi.co/json/')
-  .then(res => res.json())
-  .then(data => {
-    document.getElementById('ipDetails').innerHTML =
-      `<strong>IP:</strong> ${data.ip} <br>
-       <strong>Country:</strong> ${data.country_name} <br>
-       <strong>City:</strong> ${data.city} <br>
-       <strong>Municipality/Nagarpalika:</strong> ${data.region}`;
-  })
-  .catch(err => {
-    document.getElementById('ipDetails').innerText = 'Unable to fetch IP info';
-    console.error(err);
-  });
-</script>
+<body>
+
+<head>
+  <meta charset="UTF-8">
+  <title>IP & Location</title>
+</head>
+<body>
+  <h2>Your IP & Location</h2>
+  <div id="ipDetails">Loading...</div>
+
+  <script>
+    fetch('https://ipwhois.app/json/')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('ipDetails').innerHTML = `
+          <strong>IP:</strong> ${data.ip} <br>
+          <strong>Country:</strong> ${data.country} <br>
+          <strong>Region (Nagarpalika):</strong> ${data.region} <br>
+          <strong>City:</strong> ${data.city}
+        `;
+      })
+      .catch(error => {
+        document.getElementById('ipDetails').innerText = 'Unable to fetch IP info';
+        console.error(error);
+      });
+  </script>
+</body>
+</html>
+
+</body>
+</html>
 
 
 </body>
@@ -813,6 +824,7 @@ fetch('https://ipapi.co/json/')
 </body>
 
 </html>
+
 
 
 
