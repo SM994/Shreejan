@@ -38,32 +38,50 @@
 </head>
 
 <body>
-<section id="weather" style="text-align:center;margin:20px 0;">
-  <h3>Current Weather</h3>
-  <div id="weatherInfo">Fetching weather...</div>
+<!-- ======= Weather Section ======= -->
+<section id="weather" class="weather">
+  <div class="container text-center mt-5">
+    <div class="section-title">
+      <h2>Current Weather</h2>
+      <p>Live weather in your location</p>
+    </div>
+
+    <div id="weatherBox" style="background:#f9f9f9;padding:20px;border-radius:15px;display:inline-block;">
+      <h4 id="city">Loading location...</h4>
+      <h2 id="temp"></h2>
+      <p id="desc"></p>
+      <img id="icon" src="" alt="Weather icon" width="80">
+    </div>
+  </div>
 </section>
 
 <script>
-  function weatherText(code){
-    const t={0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',
-             45:'Fog',51:'Light drizzle',61:'Light rain',63:'Moderate rain',
-             65:'Heavy rain',80:'Rain showers',95:'Thunderstorm'};
-    return t[code]||'Unknown';
-  }
+  async function loadWeather() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        const apiKey = "YOUR_API_KEY"; // <-- replace with your OpenWeatherMap API key
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
 
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(async pos=>{
-      const {latitude,longitude}=pos.coords;
-      const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
-      const d=await r.json();
-      const w=d.current_weather;
-      document.getElementById('weatherInfo').innerHTML=
-        `🌡️ ${w.temperature}°C&nbsp;&nbsp;💨 ${w.windspeed} km/h&nbsp;&nbsp;☁️ ${weatherText(w.weathercode)}`;
-    },()=>document.getElementById('weatherInfo').innerText='Location permission denied.');
-  } else {
-    document.getElementById('weatherInfo').innerText='Geolocation not supported.';
+        const res = await fetch(url);
+        const data = await res.json();
+
+        document.getElementById("city").innerText = data.name + ", " + data.sys.country;
+        document.getElementById("temp").innerText = data.main.temp + "°C";
+        document.getElementById("desc").innerText = data.weather[0].description;
+        document.getElementById("icon").src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+      }, () => {
+        document.getElementById("weatherBox").innerText = "Location access denied.";
+      });
+    } else {
+      document.getElementById("weatherBox").innerText = "Geolocation not supported.";
+    }
   }
+  loadWeather();
 </script>
+<!-- ======= End Weather Section ======= -->
+
 
 </body>
 </html>  
@@ -819,6 +837,7 @@
 </body>
 
 </html>
+
 
 
 
