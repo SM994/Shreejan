@@ -37,52 +37,15 @@
 
 </head>
 
-<body>
-<!-- ======= Weather Section ======= -->
-<section id="weather" class="weather">
-  <div class="container text-center mt-5">
-    <div class="section-title">
-      <h2>Current Weather</h2>
-      <p>Live weather in your location</p>
-    </div>
+<body><script>
+<div id="ip-display" style="text-align:center; padding:10px; font-weight:bold;">
+<div id="ip-display" class="text-center py-2" style="font-weight:bold;">
+  Your IP Address is: <span id="user-ip">Loading...</span>
+</div>
 
-    <div id="weatherBox" style="background:#f9f9f9;padding:20px;border-radius:15px;display:inline-block;">
-      <h4 id="city">Loading location...</h4>
-      <h2 id="temp"></h2>
-      <p id="desc"></p>
-      <img id="icon" src="" alt="Weather icon" width="80">
-    </div>
-  </div>
-</section>
-
-<script>
-  async function loadWeather() {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-        const apiKey = "YOUR_API_KEY"; // <-- replace with your OpenWeatherMap API key
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
-
-        const res = await fetch(url);
-        const data = await res.json();
-
-        document.getElementById("city").innerText = data.name + ", " + data.sys.country;
-        document.getElementById("temp").innerText = data.main.temp + "°C";
-        document.getElementById("desc").innerText = data.weather[0].description;
-        document.getElementById("icon").src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
-      }, () => {
-        document.getElementById("weatherBox").innerText = "Location access denied.";
-      });
-    } else {
-      document.getElementById("weatherBox").innerText = "Geolocation not supported.";
-    }
-  }
-  loadWeather();
 </script>
+
 <!-- ======= End Weather Section ======= -->
-
-
 </body>
 </html>  
   <!-- ======= Header ======= -->
@@ -837,6 +800,7 @@
 </body>
 
 </html>
+
 
 
 
