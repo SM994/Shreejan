@@ -38,252 +38,127 @@
 </head>
 
 <body>
-<!-- <div id="ip-display" class="text-center py-2" style="font-weight:bold;">
-  Your IP Address is: <span id="user-ip">Loading...</span>
-</div>
+<!-- ======= IP, Location, Date Converter & Weather Section ======= -->
+<section id="info-tools" class="py-4 text-center" style="background:#f9f9f9;">
+  <div class="container">
+    <h3 style="margin-bottom:15px;">Your Info & Tools</h3>
 
-<script>
-  // Fetch user's IP using a free API
-  fetch('https://api.ipify.org?format=json')
-    .then(response => response.json())
-    .then(data => {
-      document.getElementById('user-ip').textContent = data.ip;
-    })
-    .catch(err => {
-      document.getElementById('user-ip').textContent = 'Unable to fetch IP';
-      console.error(err);
-    });
-</script> -->
+    <div id="ip-info" style="font-weight:600; margin-bottom:10px;">
+      Your IP: <span id="user-ip">Loading...</span> — 
+      Location: <span id="user-city">Detecting city...</span>, <span id="user-country">Detecting country...</span>
+      <div style="font-weight:500; margin-top:6px;">
+        Municipality/Nagarpalika: <span id="user-muni">Detecting...</span>
+      </div>
+    </div>
 
-<!-- ======= IP + City + Municipality Display ======= -->
-<div id="ip-info" class="text-center py-2" style="font-weight:600;">
-  Your IP: <span id="user-ip">Loading...</span> —
-  Location: <span id="user-city">Detecting city...</span>, <span id="user-country">Detecting country...</span>
-  <div style="font-weight:500; margin-top:6px;">
-    Municipality/Nagarpalika: <span id="user-muni">Detecting...</span>
+    <div class="card p-3 mx-auto" style="max-width:600px; background:white; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+      <h5>English (AD) → Nepali (BS) Converter with Weather</h5>
+      <label for="eng-date" style="margin-top:8px;">Select AD date:</label>
+      <input id="eng-date" type="date" class="form-control" style="display:inline-block; width:auto; margin-bottom:10px;" />
+      <button id="convert" class="btn btn-primary btn-sm">Convert to BS</button>
+      <div id="nep-date" style="margin-top:10px; font-weight:600;">Converted BS date will appear here</div>
+
+      <hr>
+      <div id="weather" style="font-weight:600;">Fetching weather...</div>
+    </div>
   </div>
-</div>
+</section>
 
-<script>
-(async function() {
-  const ipEl = document.getElementById('user-ip');
-  const cityEl = document.getElementById('user-city');
-  const countryEl = document.getElementById('user-country');
-  const muniEl = document.getElementById('user-muni');
+<!-- ======= Scripts ======= -->
+<script type="module">
+  // --- 🛰️ IP + City + Country + Municipality ---
+  (async function() {
+    const ipEl = document.getElementById('user-ip');
+    const cityEl = document.getElementById('user-city');
+    const countryEl = document.getElementById('user-country');
+    const muniEl = document.getElementById('user-muni');
 
-  // 1) Fetch IP + IP-based city/country (fast fallback)
-  try {
-    const r = await fetch('https://ipapi.co/json/');
-    const j = await r.json();
-    if (j && j.ip) {
-      ipEl.textContent = j.ip;
-      cityEl.textContent = j.city || (j.region || 'Unknown');
-      countryEl.textContent = j.country_name || j.country || 'Unknown';
-      // provisional municipality from IP data (if available)
-      if (j.city) muniEl.textContent = j.city;
-    } else {
+    try {
+      const r = await fetch('https://ipapi.co/json/');
+      const j = await r.json();
+      if (j && j.ip) {
+        ipEl.textContent = j.ip;
+        cityEl.textContent = j.city || j.region || 'Unknown';
+        countryEl.textContent = j.country_name || 'Unknown';
+        muniEl.textContent = j.city || 'Detecting...';
+      }
+    } catch (err) {
       ipEl.textContent = 'Unavailable';
       cityEl.textContent = 'Unavailable';
       countryEl.textContent = 'Unavailable';
+      muniEl.textContent = 'Unavailable';
     }
-  } catch (err) {
-    console.warn('IP lookup failed:', err);
-    ipEl.textContent = 'Unable to fetch IP';
-    cityEl.textContent = 'Unavailable';
-    countryEl.textContent = 'Unavailable';
-  }
 
-  // 2) Try browser GPS and reverse-geocode to get more precise municipality info
-  if ('geolocation' in navigator) {
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const lat = pos.coords.latitude;
-      const lon = pos.coords.longitude;
-
-      // Reverse geocode with Nominatim (OpenStreetMap)
-      // Note: Nominatim has usage policy; this is ok for normal small use by a website.
-      // format=jsonv2 returns address fields.
-      try {
-        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&zoom=16&addressdetails=1`;
-        const resp = await fetch(url, {
-          headers: {
-            // polite user agent recommended; browsers set one automatically
-            'Accept-Language': 'en'
-          }
-        });
-        const data = await resp.json();
-        if (data && data.address) {
-          const a = data.address;
-          // check several possible fields for municipality-like name
-          const muni = a.municipality || a.city || a.town || a.village || a.county || a.state_district || null;
-          if (muni) {
-            muniEl.textContent = muni;
-          } else {
-            // if no municipality field, fall back to city/state/county
-            muniEl.textContent = a.city || a.town || a.village || a.county || 'Unavailable';
-          }
-
-          // Also update city/country from GPS reverse geocode if available (more accurate than IP)
-          if (a.city || a.town || a.village) cityEl.textContent = a.city || a.town || a.village;
-          if (a.country) countryEl.textContent = a.country;
-        } else {
-          console.warn('Reverse-geocode returned no address');
-          // keep IP-based values as fallback
-          if (!muniEl.textContent || muniEl.textContent === 'Detecting...') muniEl.textContent = 'Unavailable';
-        }
-      } catch (err) {
-        console.warn('Reverse geocode failed:', err);
-        if (!muniEl.textContent || muniEl.textContent === 'Detecting...') muniEl.textContent = 'Unavailable';
-      }
-    }, (err) => {
-      // user denied or other error — keep IP-based city as municipality fallback
-      console.warn('Geolocation error:', err);
-      if (!muniEl.textContent || muniEl.textContent === 'Detecting...') {
-        // if IP gave a city, we already put it; else show message
-        if (!cityEl.textContent || cityEl.textContent === 'Detecting city...') {
-          muniEl.textContent = 'Not available (GPS denied)';
-        } else {
-          muniEl.textContent = cityEl.textContent; // fallback
-        }
-      }
-    }, {
-      enableHighAccuracy: false,
-      timeout: 8000,
-      maximumAge: 60_000
-    });
-  } else {
-    // geolocation not supported
-    if (!muniEl.textContent || muniEl.textContent === 'Detecting...') {
-      muniEl.textContent = cityEl.textContent || 'Not supported';
-    }
-  }
-})();
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AD → BS Converter with Weather</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 24px; max-width: 650px; margin: auto; }
-    h2 { color: #333; }
-    label, button { display: block; margin-top: 12px; }
-    #nep-date, #weather { margin-top: 14px; font-weight: 600; }
-    .card {
-      background: #f6f8fb;
-      border-radius: 10px;
-      padding: 16px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-  <h2>English (AD) → Nepali (BS) Converter with Live Weather</h2>
-
-  <div class="card">
-    <label>Select AD date:
-      <input id="eng-date" type="date" />
-    </label>
-    <button id="convert">Convert to BS</button>
-    <div id="nep-date">Converted BS date will appear here</div>
-  </div>
-
-  <div class="card" id="weather">
-    Fetching weather...
-  </div>
-
-  <script type="module">
-    // ✅ Accurate Nepali date conversion (Skydate / Nepali Date Converter)
-    import DateConverter from 'https://cdn.jsdelivr.net/npm/nepali-date-converter@3.4.0/dist/nepali-date-converter.es5.js';
-
-    const outDate = document.getElementById('nep-date');
-    const convertBtn = document.getElementById('convert');
-
-    convertBtn.addEventListener('click', () => {
-      const val = document.getElementById('eng-date').value;
-      if (!val) return alert('Please select a date.');
-
-      try {
-        const converter = new DateConverter(val);
-        const bs = converter.toBs();
-        outDate.textContent =
-          `Nepali Date (BS): ${bs.year}-${String(bs.month).padStart(2, '0')}-${String(bs.date).padStart(2, '0')}`;
-      } catch (err) {
-        outDate.textContent = 'Conversion error: ' + err.message;
-      }
-    });
-
-    // 🌦️ Fetch live weather using user's location
-    const weatherDiv = document.getElementById('weather');
-
-    async function getWeather() {
-      if (!navigator.geolocation) {
-        weatherDiv.textContent = 'Weather unavailable (no location access).';
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(async pos => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
-
         try {
-          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-          const data = await res.json();
-
-          const { temperature, windspeed, weathercode } = data.current_weather;
-          const weatherText = getWeatherText(weathercode);
-
-          weatherDiv.innerHTML = `
-            🌍 Location: ${lat.toFixed(2)}, ${lon.toFixed(2)}<br>
-            🌡️ Temperature: ${temperature}°C<br>
-            💨 Wind: ${windspeed} km/h<br>
-            ☁️ Condition: ${weatherText}
-          `;
-        } catch (e) {
-          weatherDiv.textContent = 'Unable to load weather data.';
-        }
-      }, () => {
-        weatherDiv.textContent = 'Location permission denied.';
+          const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&addressdetails=1`);
+          const data = await resp.json();
+          if (data.address) {
+            const a = data.address;
+            muniEl.textContent = a.municipality || a.city || a.town || a.village || 'Unavailable';
+            if (a.city || a.town || a.village) cityEl.textContent = a.city || a.town || a.village;
+            if (a.country) countryEl.textContent = a.country;
+          }
+        } catch {}
       });
     }
+  })();
 
-    function getWeatherText(code) {
-      const codes = {
-        0: 'Clear sky',
-        1: 'Mainly clear',
-        2: 'Partly cloudy',
-        3: 'Overcast',
-        45: 'Fog',
-        48: 'Depositing rime fog',
-        51: 'Light drizzle',
-        61: 'Light rain',
-        63: 'Moderate rain',
-        65: 'Heavy rain',
-        71: 'Light snow',
-        73: 'Moderate snow',
-        75: 'Heavy snow',
-        80: 'Rain showers',
-        95: 'Thunderstorm'
-      };
-      return codes[code] || 'Unknown';
+  // --- 📅 English (AD) → Nepali (BS) Converter (SkyDate) ---
+  import DateConverter from 'https://cdn.jsdelivr.net/npm/nepali-date-converter@3.4.0/dist/nepali-date-converter.es5.js';
+  const outDate = document.getElementById('nep-date');
+  document.getElementById('convert').addEventListener('click', () => {
+    const val = document.getElementById('eng-date').value;
+    if (!val) return alert('Please select a date.');
+    try {
+      const converter = new DateConverter(val);
+      const bs = converter.toBs();
+      outDate.textContent = `Nepali Date (BS): ${bs.year}-${String(bs.month).padStart(2, '0')}-${String(bs.date).padStart(2, '0')}`;
+    } catch (err) {
+      outDate.textContent = 'Conversion error: ' + err.message;
     }
+  });
 
-    getWeather();
-  </script>
-</body>
-</html>
+  // --- 🌤️ Weather (from Open-Meteo) ---
+  const weatherDiv = document.getElementById('weather');
+  function getWeatherText(code) {
+    const codes = {
+      0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',
+      45:'Fog',51:'Light drizzle',61:'Light rain',63:'Moderate rain',
+      65:'Heavy rain',80:'Rain showers',95:'Thunderstorm'
+    };
+    return codes[code] || 'Unknown';
+  }
 
-
-  
+  function getWeather() {
+    if (!navigator.geolocation) {
+      weatherDiv.textContent = 'Weather unavailable (no location access).';
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(async pos => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      try {
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+        const data = await res.json();
+        const { temperature, windspeed, weathercode } = data.current_weather;
+        weatherDiv.innerHTML = `
+          🌡️ Temperature: ${temperature}°C<br>
+          💨 Wind: ${windspeed} km/h<br>
+          ☁️ Condition: ${getWeatherText(weathercode)}
+        `;
+      } catch {
+        weatherDiv.textContent = 'Unable to load weather data.';
+      }
+    }, () => weatherDiv.textContent = 'Location permission denied.');
+  }
+  getWeather();
 </script>
 </body>
-</html>
-
-
-
-  
-
-  
+</html>  
   <!-- ======= Header ======= -->
   <header id="header">
 
@@ -1036,6 +911,7 @@
 </body>
 
 </html>
+
 
 
 
