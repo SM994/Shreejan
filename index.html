@@ -157,7 +157,124 @@
     }
   }
 })();
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AD → BS Converter with Weather</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 24px; max-width: 650px; margin: auto; }
+    h2 { color: #333; }
+    label, button { display: block; margin-top: 12px; }
+    #nep-date, #weather { margin-top: 14px; font-weight: 600; }
+    .card {
+      background: #f6f8fb;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>English (AD) → Nepali (BS) Converter with Live Weather</h2>
 
+  <div class="card">
+    <label>Select AD date:
+      <input id="eng-date" type="date" />
+    </label>
+    <button id="convert">Convert to BS</button>
+    <div id="nep-date">Converted BS date will appear here</div>
+  </div>
+
+  <div class="card" id="weather">
+    Fetching weather...
+  </div>
+
+  <script type="module">
+    // ✅ Accurate Nepali date conversion (Skydate / Nepali Date Converter)
+    import DateConverter from 'https://cdn.jsdelivr.net/npm/nepali-date-converter@3.4.0/dist/nepali-date-converter.es5.js';
+
+    const outDate = document.getElementById('nep-date');
+    const convertBtn = document.getElementById('convert');
+
+    convertBtn.addEventListener('click', () => {
+      const val = document.getElementById('eng-date').value;
+      if (!val) return alert('Please select a date.');
+
+      try {
+        const converter = new DateConverter(val);
+        const bs = converter.toBs();
+        outDate.textContent =
+          `Nepali Date (BS): ${bs.year}-${String(bs.month).padStart(2, '0')}-${String(bs.date).padStart(2, '0')}`;
+      } catch (err) {
+        outDate.textContent = 'Conversion error: ' + err.message;
+      }
+    });
+
+    // 🌦️ Fetch live weather using user's location
+    const weatherDiv = document.getElementById('weather');
+
+    async function getWeather() {
+      if (!navigator.geolocation) {
+        weatherDiv.textContent = 'Weather unavailable (no location access).';
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(async pos => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+
+        try {
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+          const data = await res.json();
+
+          const { temperature, windspeed, weathercode } = data.current_weather;
+          const weatherText = getWeatherText(weathercode);
+
+          weatherDiv.innerHTML = `
+            🌍 Location: ${lat.toFixed(2)}, ${lon.toFixed(2)}<br>
+            🌡️ Temperature: ${temperature}°C<br>
+            💨 Wind: ${windspeed} km/h<br>
+            ☁️ Condition: ${weatherText}
+          `;
+        } catch (e) {
+          weatherDiv.textContent = 'Unable to load weather data.';
+        }
+      }, () => {
+        weatherDiv.textContent = 'Location permission denied.';
+      });
+    }
+
+    function getWeatherText(code) {
+      const codes = {
+        0: 'Clear sky',
+        1: 'Mainly clear',
+        2: 'Partly cloudy',
+        3: 'Overcast',
+        45: 'Fog',
+        48: 'Depositing rime fog',
+        51: 'Light drizzle',
+        61: 'Light rain',
+        63: 'Moderate rain',
+        65: 'Heavy rain',
+        71: 'Light snow',
+        73: 'Moderate snow',
+        75: 'Heavy snow',
+        80: 'Rain showers',
+        95: 'Thunderstorm'
+      };
+      return codes[code] || 'Unknown';
+    }
+
+    getWeather();
+  </script>
+</body>
+</html>
+
+
+  
 </script>
 </body>
 </html>
@@ -919,6 +1036,7 @@
 </body>
 
 </html>
+
 
 
 
