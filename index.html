@@ -38,83 +38,7 @@
 </head>
 
 <body>
-<!-- ======= IP, Location, Date Converter & Weather Section ======= -->
-<section id="info-tools" class="py-4 text-center" style="background:#f9f9f9;">
-  <div class="container">
-    <h3 style="margin-bottom:15px;">Your Info & Tools</h3>
 
-    <div id="ip-info" style="font-weight:600; margin-bottom:10px;">
-      Your IP: <span id="user-ip">Loading...</span> — 
-      Location: <span id="user-city">Detecting city...</span>, <span id="user-country">Detecting country...</span>
-      <div style="font-weight:500; margin-top:6px;">
-        Municipality/Nagarpalika: <span id="user-muni">Detecting...</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ======= Scripts ======= -->
-<script type="module">
-  // --- 🛰️ IP + City + Country + Municipality ---
-  (async function() {
-    const ipEl = document.getElementById('user-ip');
-    const cityEl = document.getElementById('user-city');
-    const countryEl = document.getElementById('user-country');
-    const muniEl = document.getElementById('user-muni');
-
-    try {
-      const r = await fetch('https://ipapi.co/json/');
-      const j = await r.json();
-      if (j && j.ip) {
-        ipEl.textContent = j.ip;
-        cityEl.textContent = j.city || j.region || 'Unknown';
-        countryEl.textContent = j.country_name || 'Unknown';
-        muniEl.textContent = j.city || 'Detecting...';
-      }
-    } catch (err) {
-      ipEl.textContent = 'Unavailable';
-      cityEl.textContent = 'Unavailable';
-      countryEl.textContent = 'Unavailable';
-      muniEl.textContent = 'Unavailable';
-    }
-
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-        try {
-          const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&addressdetails=1`);
-          const data = await resp.json();
-          if (data.address) {
-            const a = data.address;
-            muniEl.textContent = a.municipality || a.city || a.town || a.village || 'Unavailable';
-            if (a.city || a.town || a.village) cityEl.textContent = a.city || a.town || a.village;
-            if (a.country) countryEl.textContent = a.country;
-          }
-        } catch {}
-      });
-    }
-  })();
-
-<script>
-  // Nepali date conversion library
-  // This is a simple conversion using approximate offset
-  // For accurate conversion, a full BS-AD map is required (can be large)
-  
-  function convertToNepali() {
-    const engDateInput = document.getElementById('eng-date').value;
-    if (!engDateInput) return alert('Please select a date');
-
-    const engDate = new Date(engDateInput);
-    
-    // Approximate offset for BS (years ahead by ~56-57 years, months/day adjustment)
-    const bsYear = engDate.getFullYear() + 56;
-    const bsMonth = engDate.getMonth() + 9 > 12 ? engDate.getMonth() - 3 : engDate.getMonth() + 9;
-    const bsDay = engDate.getDate() + 17 > 32 ? engDate.getDate() - 15 : engDate.getDate() + 17;
-
-    document.getElementById('nep-date').textContent = `${bsYear}-${('0'+bsMonth).slice(-2)}-${('0'+bsDay).slice(-2)}`;
-  }
-</script>
 </body>
 </html>  
   <!-- ======= Header ======= -->
@@ -869,6 +793,7 @@
 </body>
 
 </html>
+
 
 
 
