@@ -96,20 +96,25 @@
     }
   })();
 
-  // --- 📅 English (AD) → Nepali (BS) Converter (SkyDate) ---
-  import DateConverter from 'https://cdn.jsdelivr.net/npm/nepali-date-converter@3.4.0/dist/nepali-date-converter.es5.js';
-  const outDate = document.getElementById('nep-date');
-  document.getElementById('convert').addEventListener('click', () => {
-    const val = document.getElementById('eng-date').value;
-    if (!val) return alert('Please select a date.');
-    try {
-      const converter = new DateConverter(val);
-      const bs = converter.toBs();
-      outDate.textContent = `Nepali Date (BS): ${bs.year}-${String(bs.month).padStart(2, '0')}-${String(bs.date).padStart(2, '0')}`;
-    } catch (err) {
-      outDate.textContent = 'Conversion error: ' + err.message;
-    }
-  });
+<script>
+  // Nepali date conversion library
+  // This is a simple conversion using approximate offset
+  // For accurate conversion, a full BS-AD map is required (can be large)
+  
+  function convertToNepali() {
+    const engDateInput = document.getElementById('eng-date').value;
+    if (!engDateInput) return alert('Please select a date');
+
+    const engDate = new Date(engDateInput);
+    
+    // Approximate offset for BS (years ahead by ~56-57 years, months/day adjustment)
+    const bsYear = engDate.getFullYear() + 56;
+    const bsMonth = engDate.getMonth() + 9 > 12 ? engDate.getMonth() - 3 : engDate.getMonth() + 9;
+    const bsDay = engDate.getDate() + 17 > 32 ? engDate.getDate() - 15 : engDate.getDate() + 17;
+
+    document.getElementById('nep-date').textContent = `${bsYear}-${('0'+bsMonth).slice(-2)}-${('0'+bsDay).slice(-2)}`;
+  }
+</script>
 
  
 </script>
@@ -867,6 +872,7 @@
 </body>
 
 </html>
+
 
 
 
