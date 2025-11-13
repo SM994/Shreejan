@@ -36,7 +36,55 @@
   ======================================================== -->
 
 </head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IP & Location</title>
+  <style>
+    body {
+      height: 100vh; /* full viewport height */
+      display: flex;
+      justify-content: center; /* horizontal center */
+      align-items: center;    /* vertical center */
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+    #ipDetails {
+      padding: 20px 30px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div id="ipDetails">
+    <h2>Your IP & Location</h2>
+    <div id="info">Loading...</div>
+  </div>
 
+  <script>
+    fetch('https://ipwhois.app/json/')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('info').innerHTML = `
+          <strong>IP:</strong> ${data.ip} <br>
+          <strong>Country:</strong> ${data.country} <br>
+          <strong>Region (Nagarpalika):</strong> ${data.region} <br>
+          <strong>City:</strong> ${data.city}
+        `;
+      })
+      .catch(error => {
+        document.getElementById('info').innerText = 'Unable to fetch IP info';
+        console.error(error);
+      });
+  </script>
+</body>
+</html>
 <body>
 
 <head>
@@ -819,6 +867,7 @@
 </body>
 
 </html>
+
 
 
 
