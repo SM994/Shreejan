@@ -31,65 +31,47 @@
 <head>
   <meta charset="UTF-8">
 </head>
-<!DOCTYPE html>
-<html>
-<head>
-  <title>IP, Location & Weather</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f9;
-      padding: 20px;
-    }
-    .box {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      max-width: 400px;
-    }
-  </style>
-</head>
-<body>
+<body style="font-family: Arial; text-align:center; margin-top:50px;">
 
-  <h2>Your IP, Location & Weather</h2>
-  <div id="ipDetails" class="box">Loading...</div>
+  <h2 class="iphead">Your IP, Location & Climate</h2>
+  <div id="ipDetails" class="ip">Loading...</div>
 
   <script>
-    fetch('https://ipwho.is/')
-      .then(res => res.json())
+    fetch('https://ipwhois.app/json/')
+      .then(response => response.json())
       .then(data => {
 
         const lat = data.latitude;
         const lon = data.longitude;
 
-        // Fetch weather using latitude & longitude
+        // Fetch climate (weather) using same location
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
           .then(res => res.json())
           .then(weather => {
 
-            const temp = weather.current_weather.temperature;
-            const wind = weather.current_weather.windspeed;
-
             document.getElementById('ipDetails').innerHTML = `
               <strong>IP:</strong> ${data.ip} <br>
               <strong>Country:</strong> ${data.country} <br>
-              <strong>Region:</strong> ${data.region} <br>
+              <strong>Region (Nagarpalika):</strong> ${data.region} <br>
               <strong>City:</strong> ${data.city} <br><br>
 
-              <strong>🌡 Temperature:</strong> ${temp} °C <br>
-              <strong>🌬 Wind Speed:</strong> ${wind} km/h
+              <strong>🌡 Temperature:</strong> ${weather.current_weather.temperature} °C <br>
+              <strong>🌬 Wind Speed:</strong> ${weather.current_weather.windspeed} km/h
             `;
+
+          })
+          .catch(() => {
+            document.getElementById('ipDetails').innerHTML += "<br>Climate info unavailable.";
           });
 
       })
-      .catch(() => {
-        document.getElementById('ipDetails').innerText = "Unable to fetch data.";
+      .catch(error => {
+        document.getElementById('ipDetails').innerText = 'Unable to fetch IP info';
+        console.error(error);
       });
   </script>
 
 </body>
-</html>
   <!-- ======= Header ======= -->
   <header id="header">
 
@@ -840,6 +822,7 @@
 </body>
 
 </html>
+
 
 
 
