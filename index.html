@@ -33,18 +33,22 @@
 </head>
 <body style="font-family: Arial; text-align:center; margin-top:50px;">
 
-  <h2 class="iphead">Your IP, Location & Climate</h2>
-  <div id="ipDetails" class="ip">Loading...</div>
+  <h2>Your IP, Location & Climate</h2>
+  <div id="ipDetails">Loading...</div>
 
   <script>
-    fetch('https://ipwhois.app/json/')
+    fetch('https://ipwho.is/')
       .then(response => response.json())
       .then(data => {
+
+        if (!data.success) {
+          document.getElementById('ipDetails').innerText = "Unable to fetch IP info";
+          return;
+        }
 
         const lat = data.latitude;
         const lon = data.longitude;
 
-        // Fetch climate (weather) using same location
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
           .then(res => res.json())
           .then(weather => {
@@ -52,22 +56,20 @@
             document.getElementById('ipDetails').innerHTML = `
               <strong>IP:</strong> ${data.ip} <br>
               <strong>Country:</strong> ${data.country} <br>
-              <strong>Region (Nagarpalika):</strong> ${data.region} <br>
+              <strong>Region:</strong> ${data.region} <br>
               <strong>City:</strong> ${data.city} <br><br>
 
               <strong>🌡 Temperature:</strong> ${weather.current_weather.temperature} °C <br>
               <strong>🌬 Wind Speed:</strong> ${weather.current_weather.windspeed} km/h
             `;
-
           })
           .catch(() => {
-            document.getElementById('ipDetails').innerHTML += "<br>Climate info unavailable.";
+            document.getElementById('ipDetails').innerText = "Weather unavailable.";
           });
 
       })
-      .catch(error => {
-        document.getElementById('ipDetails').innerText = 'Unable to fetch IP info';
-        console.error(error);
+      .catch(() => {
+        document.getElementById('ipDetails').innerText = "Unable to fetch IP info.";
       });
   </script>
 
@@ -822,6 +824,7 @@
 </body>
 
 </html>
+
 
 
 
