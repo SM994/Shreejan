@@ -33,18 +33,13 @@
 </head>
 <body style="font-family: Arial; text-align:center; margin-top:50px;">
 
-  <h2>Your IP, Location & Climate</h2>
+  <h2>Your IP, Location & Weather</h2>
   <div id="ipDetails">Loading...</div>
 
   <script>
-    fetch('https://ipwho.is/')
+    fetch('https://ipapi.co/json/')
       .then(response => response.json())
       .then(data => {
-
-        if (!data.success) {
-          document.getElementById('ipDetails').innerText = "Unable to fetch IP info";
-          return;
-        }
 
         const lat = data.latitude;
         const lon = data.longitude;
@@ -55,24 +50,30 @@
 
             document.getElementById('ipDetails').innerHTML = `
               <strong>IP:</strong> ${data.ip} <br>
-              <strong>Country:</strong> ${data.country} <br>
+              <strong>Country:</strong> ${data.country_name} <br>
               <strong>Region:</strong> ${data.region} <br>
               <strong>City:</strong> ${data.city} <br><br>
 
               <strong>🌡 Temperature:</strong> ${weather.current_weather.temperature} °C <br>
               <strong>🌬 Wind Speed:</strong> ${weather.current_weather.windspeed} km/h
             `;
+
           })
           .catch(() => {
-            document.getElementById('ipDetails').innerText = "Weather unavailable.";
+            document.getElementById('ipDetails').innerHTML += "<br>Weather info unavailable.";
           });
 
       })
       .catch(() => {
-        document.getElementById('ipDetails').innerText = "Unable to fetch IP info.";
+        document.getElementById('ipDetails').innerText = 'Unable to fetch IP info';
       });
   </script>
 
+</body>
+
+
+
+  
 </body>
   <!-- ======= Header ======= -->
   <header id="header">
@@ -824,6 +825,7 @@
 </body>
 
 </html>
+
 
 
 
