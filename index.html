@@ -796,7 +796,7 @@ document.addEventListener("DOMContentLoaded", function () {
   </div>
 <script>
   // Fetch user's IP using a free API
-  fetch('https://api.ipify.org?format=json')
+fetch("https://ipwho.is/?format=json")
     .then(response => response.json())
     .then(data => {
       document.getElementById('user-ip').textContent = data.ip;
@@ -821,6 +821,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </body>
 
 </html>
+
 
 
 
