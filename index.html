@@ -36,42 +36,52 @@
   <h2>Your IP, Location & Climate</h2>
   <div id="ipDetails">Loading...</div>
 <script>
-fetch("https://ipwho.is/")
-  .then(response => response.json())
-  .then(data => {
+document.addEventListener("DOMContentLoaded", function () {
 
-    if (!data.success) {
-      document.getElementById('ipDetails').innerText = "Unable to fetch location info";
-      return;
-    }
+  fetch("https://ipwho.is/?format=json")
+    .then(response => response.json())
+    .then(data => {
 
-    const lat = data.latitude;
-    const lon = data.longitude;
+      if (!data || data.success === false) {
+        document.getElementById("ipDetails").innerText = "Unable to fetch location info";
+        return;
+      }
 
-    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
-      .then(res => res.json())
-      .then(weather => {
+      const lat = data.latitude;
+      const lon = data.longitude;
 
-        document.getElementById('ipDetails').innerHTML = `
-          <strong>IP:</strong> ${data.ip} <br>
-          <strong>Country:</strong> ${data.country} <br>
-          <strong>Region:</strong> ${data.region} <br>
-          <strong>City:</strong> ${data.city} <br>
-          <strong>ISP:</strong> ${data.connection.isp} <br><br>
+      fetch("https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true")
+        .then(response => response.json())
+        .then(weather => {
 
-          <strong>🌡 Temperature:</strong> ${weather.current_weather.temperature} °C <br>
-          <strong>🌬 Wind Speed:</strong> ${weather.current_weather.windspeed} km/h
-        `;
+          let temperature = "N/A";
+          let wind = "N/A";
 
-      })
-      .catch(() => {
-        document.getElementById('ipDetails').innerHTML += "<br>Weather info unavailable.";
-      });
+          if (weather.current_weather) {
+            temperature = weather.current_weather.temperature + " °C";
+            wind = weather.current_weather.windspeed + " km/h";
+          }
 
-  })
-  .catch(() => {
-    document.getElementById('ipDetails').innerText = "Unable to fetch IP info";
-  });
+          document.getElementById("ipDetails").innerHTML = `
+            <strong>IP:</strong> ${data.ip} <br>
+            <strong>Country:</strong> ${data.country} <br>
+            <strong>Region:</strong> ${data.region} <br>
+            <strong>City:</strong> ${data.city} <br>
+            <strong>ISP:</strong> ${data.connection ? data.connection.isp : "N/A"} <br><br>
+            <strong>🌡 Temperature:</strong> ${temperature} <br>
+            <strong>🌬 Wind Speed:</strong> ${wind}
+          `;
+        })
+        .catch(() => {
+          document.getElementById("ipDetails").innerHTML = "Weather info unavailable.";
+        });
+
+    })
+    .catch(() => {
+      document.getElementById("ipDetails").innerText = "Unable to fetch IP info";
+    });
+
+});
 </script>
 </body></body>
   <!-- ======= Header ======= -->
@@ -811,6 +821,7 @@ fetch("https://ipwho.is/")
 </body>
 
 </html>
+
 
 
 
