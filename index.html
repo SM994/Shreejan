@@ -35,53 +35,22 @@
 
   <h2>Your IP, Location & Climate</h2>
   <div id="ipDetails">Loading...</div>
+<div id="ipDetails">Loading...</div>
+
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-
-  fetch("https://ipwho.is/?format=json")
-    .then(response => response.json())
-    .then(data => {
-
-      if (!data || data.success === false) {
-        document.getElementById("ipDetails").innerText = "Unable to fetch location info";
-        return;
-      }
-
-      const lat = data.latitude;
-      const lon = data.longitude;
-
-      fetch("https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true")
-        .then(response => response.json())
-        .then(weather => {
-
-          let temperature = "N/A";
-          let wind = "N/A";
-
-          if (weather.current_weather) {
-            temperature = weather.current_weather.temperature + " °C";
-            wind = weather.current_weather.windspeed + " km/h";
-          }
-
-          document.getElementById("ipDetails").innerHTML = `
-            <strong>IP:</strong> ${data.ip} <br>
-            <strong>Country:</strong> ${data.country} <br>
-            <strong>Region:</strong> ${data.region} <br>
-            <strong>City:</strong> ${data.city} <br>
-            <strong>ISP:</strong> ${data.connection ? data.connection.isp : "N/A"} <br><br>
-            <strong>🌡 Temperature:</strong> ${temperature} <br>
-            <strong>🌬 Wind Speed:</strong> ${wind}
-          `;
-        })
-        .catch(() => {
-          document.getElementById("ipDetails").innerHTML = "Weather info unavailable.";
-        });
-
-    })
-    .catch(() => {
-      document.getElementById("ipDetails").innerText = "Unable to fetch IP info";
-    });
-
-});
+fetch("https://ipinfo.io/json?token=YOUR_TOKEN")
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("ipDetails").innerHTML = `
+      <strong>IP:</strong> ${data.ip}<br>
+      <strong>City:</strong> ${data.city}<br>
+      <strong>Region:</strong> ${data.region}<br>
+      <strong>Country:</strong> ${data.country}
+    `;
+  })
+  .catch(() => {
+    document.getElementById("ipDetails").innerText = "Unable to fetch info";
+  });
 </script>
 </body></body>
   <!-- ======= Header ======= -->
@@ -821,6 +790,7 @@ fetch("https://ipwho.is/?format=json")
 </body>
 
 </html>
+
 
 
 
