@@ -35,24 +35,30 @@
 
   <h2>Your IP, Location & Climate</h2>
   <div id="ipDetails">Loading...</div>
+<script>
+fetch("https://api64.ipify.org?format=json")
+  .then(response => response.json())
+  .then(ipData => {
 
-  <script>
-    fetch("https://api64.ipify.org?format=json")
-      .then(response => response.json())
+    // Second API call to get location using IP
+    fetch(`https://ipapi.co/${ipData.ip}/json/`)
+      .then(res => res.json())
       .then(data => {
 
         const lat = data.latitude;
         const lon = data.longitude;
 
+        // Third API call to get weather
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
           .then(res => res.json())
           .then(weather => {
 
             document.getElementById('ipDetails').innerHTML = `
-              <strong>IP:</strong> ${data.ip} <br>
+              <strong>IP:</strong> ${ipData.ip} <br>
               <strong>Country:</strong> ${data.country_name} <br>
               <strong>Region:</strong> ${data.region} <br>
-              <strong>City:</strong> ${data.city} <br><br>
+              <strong>City:</strong> ${data.city} <br>
+              <strong>ISP:</strong> ${data.org} <br><br>
 
               <strong>🌡 Temperature:</strong> ${weather.current_weather.temperature} °C <br>
               <strong>🌬 Wind Speed:</strong> ${weather.current_weather.windspeed} km/h
@@ -65,9 +71,15 @@
 
       })
       .catch(() => {
-        document.getElementById('ipDetails').innerText = 'Unable to fetch IP info';
-      }); 
-  </script>
+        document.getElementById('ipDetails').innerText = 'Unable to fetch location info';
+      });
+
+  })
+  .catch(() => {
+    document.getElementById('ipDetails').innerText = 'Unable to fetch IP info';
+  });
+</script>
+  
 </body></body>
   <!-- ======= Header ======= -->
   <header id="header">
@@ -806,6 +818,7 @@
 </body>
 
 </html>
+
 
 
 
