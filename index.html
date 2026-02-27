@@ -67,6 +67,22 @@
       .catch(() => {
         document.getElementById('ipDetails').innerText = 'Unable to fetch IP info';
       });
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    fetch("https://api.ipify.org?format=json")
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("ipAddress").innerText = data.ip;
+        })
+        .catch(() => {
+            document.getElementById("ipAddress").innerText = "Unable to fetch IP";
+        });
+});
+</script>
+
+
+
+    
   </script></body></body>
   <!-- ======= Header ======= -->
   <header id="header">
@@ -823,6 +839,7 @@
 </body>
 
 </html>
+
 
 
 
