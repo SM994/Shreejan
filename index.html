@@ -38,48 +38,41 @@
 <script>
 fetch("https://ipwho.is/")
   .then(response => response.json())
-  .then(ipData => {
+  .then(data => {
 
-    // Second API call to get location using IP
-    fetch(`https://ipapi.co/${ipData.ip}/json/`)
+    if (!data.success) {
+      document.getElementById('ipDetails').innerText = "Unable to fetch location info";
+      return;
+    }
+
+    const lat = data.latitude;
+    const lon = data.longitude;
+
+    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
       .then(res => res.json())
-      .then(data => {
+      .then(weather => {
 
-        const lat = data.latitude;
-        const lon = data.longitude;
+        document.getElementById('ipDetails').innerHTML = `
+          <strong>IP:</strong> ${data.ip} <br>
+          <strong>Country:</strong> ${data.country} <br>
+          <strong>Region:</strong> ${data.region} <br>
+          <strong>City:</strong> ${data.city} <br>
+          <strong>ISP:</strong> ${data.connection.isp} <br><br>
 
-        // Third API call to get weather
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
-          .then(res => res.json())
-          .then(weather => {
-
-            document.getElementById('ipDetails').innerHTML = `
-              <strong>IP:</strong> ${ipData.ip} <br>
-              <strong>Country:</strong> ${data.country_name} <br>
-              <strong>Region:</strong> ${data.region} <br>
-              <strong>City:</strong> ${data.city} <br>
-              <strong>ISP:</strong> ${data.org} <br><br>
-
-              <strong>🌡 Temperature:</strong> ${weather.current_weather.temperature} °C <br>
-              <strong>🌬 Wind Speed:</strong> ${weather.current_weather.windspeed} km/h
-            `;
-
-          })
-          .catch(() => {
-            document.getElementById('ipDetails').innerHTML += "<br>Weather info unavailable.";
-          });
+          <strong>🌡 Temperature:</strong> ${weather.current_weather.temperature} °C <br>
+          <strong>🌬 Wind Speed:</strong> ${weather.current_weather.windspeed} km/h
+        `;
 
       })
       .catch(() => {
-        document.getElementById('ipDetails').innerText = 'Unable to fetch location info';
+        document.getElementById('ipDetails').innerHTML += "<br>Weather info unavailable.";
       });
 
   })
   .catch(() => {
-    document.getElementById('ipDetails').innerText = 'Unable to fetch IP info';
+    document.getElementById('ipDetails').innerText = "Unable to fetch IP info";
   });
 </script>
-  
 </body></body>
   <!-- ======= Header ======= -->
   <header id="header">
@@ -818,6 +811,7 @@ fetch("https://ipwho.is/")
 </body>
 
 </html>
+
 
 
 
